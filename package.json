@@ -1,0 +1,43 @@
+{
+  "name": "examlist-template-editor",
+  "version": "0.1.0",
+  "description": "Portable core utilities for the ExamList template editor.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahe45/template-editor.git"
+  },
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./core": {
+      "types": "./types/index.d.ts",
+      "import": "./src/core/index.js"
+    }
+  },
+  "files": [
+    "src",
+    "types",
+    "fixtures",
+    "docs",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "test:consumer": "node scripts/verify-consumer-install.js",
+    "pack:check": "npm pack --dry-run",
+    "verify": "npm test && npm run pack:check && npm run test:consumer"
+  },
+  "keywords": [
+    "examlist",
+    "template-editor",
+    "data-tags"
+  ],
+  "license": "UNLICENSED"
+}

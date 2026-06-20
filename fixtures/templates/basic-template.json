@@ -1,0 +1,26 @@
+{
+  "id": "template-basic",
+  "name": "Basic portable template",
+  "layout": {
+    "id": "layout-basic",
+    "dataTagSettings": {
+      "sampleData": {
+        "candidate.examDate": "2026-11-28",
+        "candidate.examStartTime": "09:00"
+      },
+      "emptyValueData": {
+        "candidate.examDate": "시험날짜",
+        "candidate.examStartTime": "시작시간"
+      }
+    },
+    "pages": [
+      {
+        "id": "page-1",
+        "type": "content",
+        "settings": {
+          "documentHtml": "<p><span class=\"template-token\" data-template-tag-value=\"candidate.examDate\" data-template-tag-format-type=\"date\" data-template-tag-format=\"YYYY.MM.DD (ddd)\">시험날짜</span></p>"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "groups": [
+    {
+      "id": "candidate",
+      "label": "수험생",
+      "tags": [
+        {
+          "key": "candidate.name",
+          "label": "이름",
+          "type": "string",
+          "example": "홍길동"
+        },
+        {
+          "key": "candidate.examDate",
+          "label": "시험날짜",
+          "type": "date",
+          "example": "2026-11-28"
+        },
+        {
+          "key": "candidate.birthDate",
+          "label": "생년월일",
+          "type": "date",
+          "example": "2006-01-02"
+        },
+        {
+          "key": "candidate.examStartTime",
+          "label": "시작시간",
+          "type": "time",
+          "example": "09:00"
+        },
+        {
+          "key": "candidate.examEndTime",
+          "label": "종료시간",
+          "type": "time",
+          "example": "11:00"
+        }
+      ]
+    }
+  ]
+}
