@@ -58,6 +58,47 @@ const editor = mountTemplateEditor({
 });
 ```
 
+## 다른 프로젝트 전달용 문구
+
+다른 프로젝트에 양식 편집기 적용을 요청할 때 아래 내용을 그대로 전달하면 됩니다.
+
+```text
+아래 템플릿 편집기 패키지를 설치해서 적용해줘.
+
+npm install github:ahe45/template-editor#v1.0.0
+
+사용 방식은 아래와 같아.
+
+import { mountTemplateEditor } from "examlist-template-editor";
+import "examlist-template-editor/styles.css";
+
+저장, PDF 미리보기, 이미지 업로드, 데이터 태그 로드는 현재 프로젝트의 API에 맞게 adapter로 연결해줘.
+```
+
+최소 연결 예시는 아래와 같습니다.
+
+```js
+const editor = mountTemplateEditor({
+  root: document.getElementById("editor"),
+  template,
+  dataTags,
+  adapters: {
+    saveTemplate: async ({ template }) => {
+      // 현재 프로젝트의 저장 API에 연결합니다.
+      return template;
+    },
+    previewPdf: async ({ template, sampleData }) => {
+      // 현재 프로젝트의 PDF 미리보기 API에 연결합니다.
+      return { html: "", pageCount: 1, warnings: [] };
+    },
+    uploadImage: async ({ file }) => {
+      // 현재 프로젝트의 이미지 업로드 API에 연결합니다.
+      return { url: "", alt: file.name };
+    },
+  },
+});
+```
+
 ## Core Usage
 
 ```js
