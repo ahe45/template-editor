@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0
+
+- Promoted the portable editor package to the first stable GitHub-installable release.
+- Added public image upload adapter support for `editor.insertImage(file)`, `editor.uploadImage(file)`, and toolbar file input insertion.
+- Added TypeScript declarations for upload adapter requests and uploaded image results.
+- Extended the Playwright browser scenario to verify adapter-backed image upload from both the public API and toolbar file input.
+- Updated README and integration/API docs for the `v1.0.0` install path and stable adapter contract.
+
 ## 0.7.1
 
 - Fixed standalone GitHub Actions builds by reusing committed runtime/CSS artifacts when the ExamList source tree is not available.

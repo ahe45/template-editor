@@ -28,12 +28,12 @@ Definitions with `type: "date"` or `type: "time"` are also supported.
 - `buildDataTagSampleValueErrors(tagDefinitions, sampleValues)`
 - `hasDataTagSampleValueErrors(errors)`
 
-Sample value constraints are narrower than display format support:
+Sample value constraints are intentionally narrower than display formatting:
 
 - `candidate.examDate`: validates `yyyy-mm-dd` when a value exists.
 - `candidate.examStartTime`: validates `hh:mm` when a value exists.
 - `candidate.examEndTime`: validates `hh:mm` when a value exists.
-- `candidate.birthDate`: supports display formatting, but has no sample value validation rule in this package version.
+- `candidate.birthDate`: supports display formatting, but has no sample-value validation rule in this package version.
 
 ## Data Tag Value Formatting
 
@@ -119,6 +119,7 @@ const editor = mountTemplateEditor({
   adapters: {
     saveTemplate: async ({ template }) => template,
     previewPdf: async ({ template, html, sampleData }) => ({ html, pageCount: 1 }),
+    uploadImage: async ({ file }) => ({ url: `/uploads/${file.name}`, alt: file.name }),
     buildApiUrl: (path) => path,
   },
 });
@@ -136,7 +137,21 @@ Minimum returned API:
 - `focus()`
 - `destroy()`
 
-The returned object also exposes runtime editing helpers such as `insertHtml()`, `insertTag()`, `insertImageSource()`, `undo()`, and `redo()`.
+Additional editing helpers:
+
+- `insertHtml(html)`
+- `insertTag(tag)`
+- `insertImage(file, context)`
+- `insertImageFile(file, context)`
+- `insertImageSource(source, caption)`
+- `insertUploadedImage(uploadResult, context)`
+- `uploadImage(file, context)`
+- `undo()`
+- `redo()`
+
+When `adapters.uploadImage` is provided, `insertImage(file)` and the toolbar image file input call that adapter and insert the returned image URL. Without `uploadImage`, file insertion falls back to the bundled runtime's local data URL behavior.
+
+`uploadImage` may return a URL string or an object with one of `url`, `src`, `href`, `source`, `path`, `filePath`, or `key`. Optional `alt`, `caption`, `title`, `name`, `width`, and `height` fields are used when generating the inserted image markup.
 
 ## CSS
 

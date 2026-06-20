@@ -3,13 +3,13 @@
 ## Install
 
 ```bash
-npm install github:ahe45/template-editor#v0.7.1
+npm install github:ahe45/template-editor#v1.0.0
 ```
 
 For a private repository, prefer SSH in local development:
 
 ```bash
-npm install git+ssh://git@github.com/ahe45/template-editor.git#v0.7.1
+npm install git+ssh://git@github.com/ahe45/template-editor.git#v1.0.0
 ```
 
 CI servers need a GitHub token or SSH deploy key that can read the repository.
@@ -24,8 +24,8 @@ import {
 } from "examlist-template-editor";
 
 const definitions = [
-  { key: "candidate.examDate", label: "시험날짜", type: "date", example: "2026-11-28" },
-  { key: "candidate.examStartTime", label: "시작시간", type: "time", example: "09:00" },
+  { key: "candidate.examDate", label: "Exam date", type: "date", example: "2026-11-28" },
+  { key: "candidate.examStartTime", label: "Start time", type: "time", example: "09:00" },
 ];
 
 const errors = {
@@ -35,12 +35,12 @@ const errors = {
 const text = formatDataTagSampleValue(
   "candidate.examDate",
   "2026-11-28",
-  "YYYY년 M월 D일 dddd",
+  "YYYY.MM.DD (dddd)",
 );
 
 const payload = createDataTagSettingsPayload(definitions, {
   sampleData: { "candidate.examDate": "2026-11-28" },
-  emptyValueData: { "candidate.examDate": "시험날짜" },
+  emptyValueData: { "candidate.examDate": "Exam date" },
 });
 ```
 
@@ -61,6 +61,15 @@ const editor = mountTemplateEditor({
     },
     previewPdf: async ({ template, sampleData }) => {
       return previewTemplateWithYourApi(template, sampleData);
+    },
+    uploadImage: async ({ file }) => {
+      const uploaded = await uploadImageToYourApi(file);
+      return {
+        url: uploaded.url,
+        alt: file.name,
+        width: uploaded.width,
+        height: uploaded.height,
+      };
     },
     buildApiUrl: (path) => new URL(path, location.origin).href,
   },
@@ -92,13 +101,30 @@ If `selectedPageId` is supplied, that page is updated. Otherwise the first page 
 - Consumer projects own save, preview, auth, routing, and upload behavior.
 - Generated barcode/QR preview URLs should be supplied with `buildApiUrl()` or a preview adapter.
 - `previewPdf` is optional. Without it, `editor.preview()` returns local rendered HTML.
+- `uploadImage` is optional. Without it, image file insertion uses local data URLs.
+
+## Data Tags
+
+Load project-specific data tags before mounting the editor and pass them through `dataTags`.
+
+```js
+const dataTags = await loadDataTagsFromYourApi();
+
+const editor = mountTemplateEditor({
+  root,
+  template,
+  dataTags,
+});
+```
+
+This keeps data loading, authentication, caching, and error handling in the consumer project.
 
 ## Read-Only Mode
 
 ```js
 const editor = mountTemplateEditor({
   root,
-  html: "<p>읽기 전용</p>",
+  html: "<p>Read-only body</p>",
   permissions: {
     canManageTemplates: false,
   },

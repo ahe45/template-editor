@@ -6,6 +6,100 @@ function isObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
+function escapeHtmlAttribute(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => {
+    switch (character) {
+      case "&":
+        return "&amp;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case '"':
+        return "&quot;";
+      case "'":
+        return "&#39;";
+      default:
+        return character;
+    }
+  });
+}
+
+function getFirstNonEmptyString(...values) {
+  for (const value of values) {
+    const text = String(value ?? "").trim();
+
+    if (text) {
+      return text;
+    }
+  }
+
+  return "";
+}
+
+function normalizeImageDimension(value) {
+  const numberValue = Number(value);
+
+  if (!Number.isFinite(numberValue) || numberValue <= 0) {
+    return null;
+  }
+
+  return Math.round(numberValue);
+}
+
+function getUploadedImageSource(uploadResult, runtimeOptions) {
+  if (typeof uploadResult === "string") {
+    return uploadResult.trim();
+  }
+
+  if (!isObject(uploadResult)) {
+    return "";
+  }
+
+  const directSource = getFirstNonEmptyString(
+    uploadResult.url,
+    uploadResult.src,
+    uploadResult.href,
+    uploadResult.source,
+  );
+
+  if (directSource) {
+    return directSource;
+  }
+
+  const pathSource = getFirstNonEmptyString(uploadResult.path, uploadResult.filePath, uploadResult.key);
+
+  if (!pathSource) {
+    return "";
+  }
+
+  const resolvedSource =
+    typeof runtimeOptions.buildApiUrl === "function" ? String(runtimeOptions.buildApiUrl(pathSource) || "").trim() : "";
+
+  return resolvedSource || pathSource;
+}
+
+function buildUploadedImageMarkup(uploadResult, file, runtimeOptions) {
+  const source = getUploadedImageSource(uploadResult, runtimeOptions);
+
+  if (!source) {
+    return "";
+  }
+
+  const caption =
+    typeof uploadResult === "string"
+      ? getFirstNonEmptyString(file?.name, "image")
+      : getFirstNonEmptyString(uploadResult.alt, uploadResult.caption, uploadResult.title, uploadResult.name, file?.name, "image");
+  const width = isObject(uploadResult) ? normalizeImageDimension(uploadResult.width) : null;
+  const height = isObject(uploadResult) ? normalizeImageDimension(uploadResult.height) : null;
+  const sizeAttributes = [
+    width ? ` width="${width}"` : "",
+    height ? ` height="${height}"` : "",
+  ].join("");
+
+  return `<img src="${escapeHtmlAttribute(source)}" alt="${escapeHtmlAttribute(caption)}" title="${escapeHtmlAttribute(caption)}"${sizeAttributes} />`;
+}
+
 function cloneTemplateValue(value) {
   if (!isObject(value)) {
     return value;
@@ -253,7 +347,9 @@ export function mountTemplateEditor(options = {}) {
   let currentTemplate = options.template ?? options.html ?? options.initialHtml ?? "";
   let editorApi = null;
   let baselineHtml = resolveInitialHtml(options);
+  let readOnlyState = options.readOnly === true || options.permissions?.canManageTemplates === false;
   const dirtyState = { isDirty: false };
+  const disposers = [];
 
   const handleRuntimeChange = (html, runtimeApi) => {
     const nextHtml = String(html || "");
@@ -269,9 +365,8 @@ export function mountTemplateEditor(options = {}) {
   const runtimeOptions = normalizeRuntimeOptions(options, instanceId, handleRuntimeChange);
   const rootElement = runtimeOptions.root;
   const runtimeApi = bundledTemplateEditorRuntime.createTemplateEditor(runtimeOptions);
-  const isReadOnly = options.readOnly === true || options.permissions?.canManageTemplates === false;
 
-  applyReadOnlyMode(rootElement, isReadOnly);
+  applyReadOnlyMode(rootElement, readOnlyState);
 
   function getHtml() {
     return runtimeApi.getHtml();
@@ -346,15 +441,100 @@ export function mountTemplateEditor(options = {}) {
     return savedTemplate ?? template;
   }
 
+  function insertUploadedImage(uploadResult, context = {}) {
+    if (readOnlyState) {
+      return false;
+    }
+
+    const markup = buildUploadedImageMarkup(uploadResult, context.file, runtimeOptions);
+
+    if (!markup) {
+      return false;
+    }
+
+    return runtimeApi.insertHtml(markup) !== false;
+  }
+
+  async function insertImage(file, context = {}) {
+    if (!file || readOnlyState) {
+      return false;
+    }
+
+    if (typeof adapters.uploadImage !== "function") {
+      runtimeApi.insertImage(file);
+      return true;
+    }
+
+    const uploadResult = await adapters.uploadImage({
+      ...context,
+      editor: editorApi,
+      file,
+      html: getHtml(),
+      template: getValue(),
+    });
+
+    return insertUploadedImage(uploadResult, { ...context, file });
+  }
+
   function focus() {
     rootElement.querySelector("[data-template-editor-runtime-surface]")?.focus();
   }
 
   function setReadOnly(nextReadOnly) {
-    applyReadOnlyMode(rootElement, Boolean(nextReadOnly));
+    readOnlyState = Boolean(nextReadOnly);
+    applyReadOnlyMode(rootElement, readOnlyState);
+  }
+
+  if (typeof adapters.uploadImage === "function") {
+    const handleUploadInputChange = (event) => {
+      const target = event.target;
+
+      if (
+        !target ||
+        String(target.tagName || "").toUpperCase() !== "INPUT" ||
+        target.type !== "file" ||
+        !target.classList?.contains("upload-file-input")
+      ) {
+        return;
+      }
+
+      const file = target.files?.[0] || null;
+
+      if (!file) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation?.();
+
+      insertImage(file, { source: "toolbar" }).catch((error) => {
+        options.onUploadError?.(error, {
+          editor: editorApi,
+          file,
+        });
+
+        const CustomEventConstructor = rootElement.ownerDocument?.defaultView?.CustomEvent;
+
+        if (typeof CustomEventConstructor === "function") {
+          rootElement.dispatchEvent(
+            new CustomEventConstructor("examlist-template-editor:image-upload-error", {
+              bubbles: true,
+              detail: { error, file },
+            }),
+          );
+        }
+      });
+
+      target.value = "";
+    };
+
+    rootElement.addEventListener("change", handleUploadInputChange, true);
+    disposers.push(() => rootElement.removeEventListener("change", handleUploadInputChange, true));
   }
 
   function destroy() {
+    disposers.splice(0).forEach((dispose) => dispose());
     runtimeApi.destroy();
     removeTransientRuntimeNodes(rootElement);
     rootElement.classList.remove("is-read-only");
@@ -375,8 +555,10 @@ export function mountTemplateEditor(options = {}) {
     getRuntime: () => runtimeApi,
     getValue,
     insertHtml: runtimeApi.insertHtml,
-    insertImage: runtimeApi.insertImage,
+    insertImage,
+    insertImageFile: insertImage,
     insertImageSource: runtimeApi.insertImageSource,
+    insertUploadedImage,
     insertTag: runtimeApi.insertTag,
     isDirty: () => dirtyState.isDirty,
     preview,
@@ -389,6 +571,7 @@ export function mountTemplateEditor(options = {}) {
     setValue,
     sync,
     undo: runtimeApi.undo,
+    uploadImage: insertImage,
   });
 
   return editorApi;

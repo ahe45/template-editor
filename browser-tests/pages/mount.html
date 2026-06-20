@@ -69,6 +69,7 @@
       };
 
       window.changeEvents = [];
+      window.uploadEvents = [];
       window.editorA = mountTemplateEditor({
         root: document.getElementById("editorA"),
         template: firstTemplate,
@@ -76,6 +77,19 @@
         adapters: {
           buildApiUrl: () => "",
           saveTemplate: async ({ template }) => template,
+          uploadImage: async ({ file, source }) => {
+            window.uploadEvents.push({
+              name: file.name,
+              source,
+            });
+
+            return {
+              alt: `uploaded:${file.name}`,
+              height: 9,
+              url: `/uploads/${file.name}`,
+              width: 12,
+            };
+          },
         },
         onChange: (template, context) => {
           window.changeEvents.push({

@@ -72,11 +72,37 @@ export interface SaveTemplateRequest {
   [key: string]: unknown;
 }
 
+export interface UploadImageRequest {
+  editor: MountedTemplateEditor | null;
+  file: File;
+  html: string;
+  template: TemplateEditorValue;
+  [key: string]: unknown;
+}
+
+export interface UploadedImageResult {
+  url?: string;
+  src?: string;
+  href?: string;
+  source?: string;
+  path?: string;
+  filePath?: string;
+  key?: string;
+  alt?: string;
+  caption?: string;
+  title?: string;
+  name?: string;
+  width?: number;
+  height?: number;
+  [key: string]: unknown;
+}
+
 export interface TemplateEditorAdapterMap {
   buildApiUrl?: (path: string) => string;
   resolveAssetUrl?: (path: string) => string;
   saveTemplate?: (context: SaveTemplateRequest) => Promise<TemplateEditorValue | void> | TemplateEditorValue | void;
   previewPdf?: (context: PreviewPdfRequest) => Promise<PreviewPdfResult> | PreviewPdfResult;
+  uploadImage?: (context: UploadImageRequest) => Promise<UploadedImageResult | string | void> | UploadedImageResult | string | void;
 }
 
 export interface TemplateEditorPermissions {
@@ -117,6 +143,7 @@ export interface MountTemplateEditorOptions {
   ) => void;
   onDirtyChange?: (isDirty: boolean) => void;
   onSetHtml?: (html: string, runtime: unknown, context: { notify: boolean; resetHistory: boolean }) => void;
+  onUploadError?: (error: unknown, context: { editor: MountedTemplateEditor | null; file: File }) => void;
   [key: string]: unknown;
 }
 
@@ -128,8 +155,10 @@ export interface MountedTemplateEditor {
   getRuntime: () => unknown;
   getValue: () => TemplateEditorValue;
   insertHtml: (html: string) => unknown;
-  insertImage: (...args: unknown[]) => unknown;
+  insertImage: (file: File, context?: Record<string, unknown>) => Promise<boolean>;
+  insertImageFile: (file: File, context?: Record<string, unknown>) => Promise<boolean>;
   insertImageSource: (...args: unknown[]) => unknown;
+  insertUploadedImage: (uploadResult: UploadedImageResult | string, context?: { file?: File; [key: string]: unknown }) => boolean;
   insertTag: (tag: string) => unknown;
   isDirty: () => boolean;
   preview: (context?: Record<string, unknown>) => Promise<PreviewPdfResult>;
@@ -151,6 +180,7 @@ export interface MountedTemplateEditor {
   ) => void;
   sync: () => TemplateEditorValue;
   undo: () => unknown;
+  uploadImage: (file: File, context?: Record<string, unknown>) => Promise<boolean>;
 }
 
 export interface DataTagSampleValueConstraint {

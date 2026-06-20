@@ -4,6 +4,7 @@ import {
   type DataTagDefinition,
   type MountedTemplateEditor,
   type TemplateLayoutPayload,
+  type UploadedImageResult,
 } from "examlist-template-editor";
 import { renderDataTagFormatPreview } from "examlist-template-editor/core";
 import { getTemplateEditorRuntime } from "examlist-template-editor/runtime";
@@ -35,6 +36,12 @@ const editor: MountedTemplateEditor = mountTemplateEditor({
   adapters: {
     saveTemplate: async ({ template: nextTemplate }) => nextTemplate,
     previewPdf: async ({ html }) => ({ html, pageCount: 1, warnings: [] }),
+    uploadImage: async ({ file, template: currentTemplate }): Promise<UploadedImageResult> => ({
+      alt: file.name,
+      templateId: typeof currentTemplate === "string" ? "html" : currentTemplate.id,
+      url: `/uploads/${file.name}`,
+      width: 120,
+    }),
   },
   onChange(nextTemplate, context) {
     const changedTemplate: string | TemplateLayoutPayload = nextTemplate;
@@ -46,6 +53,9 @@ const editor: MountedTemplateEditor = mountTemplateEditor({
 
 editor.setValue(template, { markClean: true });
 editor.setReadOnly(true);
+void editor.insertImage(new File([""], "sample.png", { type: "image/png" }));
+void editor.insertImageFile(new File([""], "sample-2.png", { type: "image/png" }));
+editor.insertUploadedImage({ url: "/uploads/sample.png", alt: "sample" });
 editor.destroy();
 
 void formatted;

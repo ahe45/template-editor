@@ -211,6 +211,9 @@ test.describe("mountTemplateEditor browser integration", () => {
         },
         { notify: true },
       );
+      await window.editorA.insertImage(new File(["api-upload"], "api-upload.png", { type: "image/png" }), {
+        source: "api",
+      });
       window.editorA.insertHtml("<table><tbody><tr><td>셀</td></tr></tbody></table>");
       window.editorA.insertHtml('<img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="샘플" />');
 
@@ -223,6 +226,7 @@ test.describe("mountTemplateEditor browser integration", () => {
         html: window.editorA.getHtml(),
         previewHtml: preview.html,
         saved,
+        uploadEvents: window.uploadEvents,
         value: window.editorA.getValue(),
       };
     });
@@ -230,11 +234,31 @@ test.describe("mountTemplateEditor browser integration", () => {
     expect(interactionResult.html).toContain("변경된 본문");
     expect(interactionResult.html).toContain("<table");
     expect(interactionResult.html).toContain("<img");
+    expect(interactionResult.html).toContain("/uploads/api-upload.png");
+    expect(interactionResult.html).toContain('alt="uploaded:api-upload.png"');
     expect(interactionResult.value.layout.pages[0].settings.documentHtml).toContain("변경된 본문");
     expect(interactionResult.previewHtml).toContain("변경된 본문");
     expect(interactionResult.saved.layout.pages[0].settings.documentHtml).toContain("변경된 본문");
     expect(interactionResult.changeEvents.length).toBeGreaterThanOrEqual(1);
     expect(interactionResult.dirtyAfterSave).toBe(false);
+    expect(interactionResult.uploadEvents).toEqual([{ name: "api-upload.png", source: "api" }]);
+
+    await page.locator("#editorA input.upload-file-input").setInputFiles({
+      buffer: Buffer.from("toolbar-upload"),
+      mimeType: "image/png",
+      name: "toolbar-upload.png",
+    });
+    await expect
+      .poll(() => page.evaluate(() => window.uploadEvents.length), { timeout: 5_000 })
+      .toBe(2);
+
+    const toolbarUploadState = await page.evaluate(() => ({
+      html: window.editorA.getHtml(),
+      uploadEvents: window.uploadEvents,
+    }));
+    expect(toolbarUploadState.html).toContain("/uploads/toolbar-upload.png");
+    expect(toolbarUploadState.html).toContain('alt="uploaded:toolbar-upload.png"');
+    expect(toolbarUploadState.uploadEvents[1]).toEqual({ name: "toolbar-upload.png", source: "toolbar" });
 
     const readOnlyState = await page.evaluate(() => {
       const surface = document.querySelector("#editorReadOnly [data-template-editor-runtime-surface]");
