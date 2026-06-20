@@ -17,6 +17,47 @@ npm install github:ahe45/template-editor#v1.0.0
 
 Use immutable tags for application projects. Do not depend on a moving branch for production.
 
+## Handoff Text For Another Project
+
+Copy this text when asking another project to apply the editor package:
+
+```text
+Install and apply the template editor package below.
+
+npm install github:ahe45/template-editor#v1.0.0
+
+Use it like this:
+
+import { mountTemplateEditor } from "examlist-template-editor";
+import "examlist-template-editor/styles.css";
+
+Connect save, PDF preview, image upload, and data-tag loading to this project's own APIs through adapters.
+```
+
+Minimum integration shape:
+
+```js
+const editor = mountTemplateEditor({
+  root: document.getElementById("editor"),
+  template,
+  dataTags,
+  adapters: {
+    saveTemplate: async ({ template }) => {
+      // Connect this project's save API.
+      return template;
+    },
+    previewPdf: async ({ template, sampleData }) => {
+      // Connect this project's PDF preview API.
+      return { html: "", pageCount: 1, warnings: [] };
+    },
+    uploadImage: async ({ file }) => {
+      // Connect this project's image upload API.
+      return { url: "", alt: file.name };
+    },
+  },
+});
+```
+
 ## Core Usage
 
 ```js
