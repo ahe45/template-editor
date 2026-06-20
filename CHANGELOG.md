@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+- Fixed the packaged runtime layout so the editor uses the same four-column toolbar, tag panel, canvas, and page-properties arrangement as the ExamList editor.
+- Added scoped form-control resets to reduce interference from host application global `button`, `input`, and `select` styles.
+- Added a browser regression test for runtime layout placement and host CSS isolation.
+
 ## 1.0.0
 
 - Promoted the portable editor package to the first stable GitHub-installable release.

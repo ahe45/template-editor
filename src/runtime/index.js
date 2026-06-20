@@ -291,6 +291,10 @@ function removeTransientRuntimeNodes(rootElement) {
     });
 }
 
+function applyRuntimeLayoutClasses(rootElement) {
+  rootElement.querySelector(".template-editor-runtime-shell")?.classList.add("examlist-template-editor-body");
+}
+
 function normalizeRuntimeOptions(options, instanceId, onRuntimeChange) {
   const documentRef = options.document || globalThis.document;
   const rootElement = resolveRootElement(options.root || options.container, documentRef);
@@ -366,6 +370,7 @@ export function mountTemplateEditor(options = {}) {
   const rootElement = runtimeOptions.root;
   const runtimeApi = bundledTemplateEditorRuntime.createTemplateEditor(runtimeOptions);
 
+  applyRuntimeLayoutClasses(rootElement);
   applyReadOnlyMode(rootElement, readOnlyState);
 
   function getHtml() {

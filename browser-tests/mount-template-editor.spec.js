@@ -195,6 +195,40 @@ test.describe("mountTemplateEditor browser integration", () => {
     });
     expect(duplicateIds).toEqual([]);
 
+    const runtimeLayout = await page.evaluate(() => {
+      const shell = document.querySelector("#editorA .template-editor-runtime-shell");
+      const toolbar = document.querySelector("#editorA .editor-toolbar-column");
+      const tagPanel = document.querySelector("#editorA .template-tag-panel");
+      const pagePanel = document.querySelector("#editorA .template-editor-page");
+      const pageProperties = document.querySelector("#editorA .template-page-properties-panel");
+      const toolButton = document.querySelector("#editorA .template-tool-button.icon-only");
+      const rect = (element) => {
+        const { height, left, top, width } = element.getBoundingClientRect();
+        return {
+          height: Math.round(height),
+          left: Math.round(left),
+          top: Math.round(top),
+          width: Math.round(width),
+        };
+      };
+
+      return {
+        page: rect(pagePanel),
+        pageProperties: rect(pageProperties),
+        shellClassName: shell.className,
+        tagPanel: rect(tagPanel),
+        toolbar: rect(toolbar),
+        toolButton: rect(toolButton),
+      };
+    });
+    expect(runtimeLayout.shellClassName).toContain("examlist-template-editor-body");
+    expect(runtimeLayout.tagPanel.left).toBeGreaterThan(runtimeLayout.toolbar.left);
+    expect(runtimeLayout.page.left).toBeGreaterThan(runtimeLayout.tagPanel.left);
+    expect(runtimeLayout.pageProperties.left).toBeGreaterThan(runtimeLayout.page.left);
+    expect(Math.abs(runtimeLayout.pageProperties.top - runtimeLayout.page.top)).toBeLessThanOrEqual(2);
+    expect(runtimeLayout.toolButton.width).toBeLessThan(80);
+    expect(runtimeLayout.toolButton.height).toBeLessThan(80);
+
     const interactionResult = await page.evaluate(async () => {
       window.editorA.setValue(
         {

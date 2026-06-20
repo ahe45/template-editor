@@ -17,6 +17,34 @@
   box-sizing: border-box;
 }
 
+.examlist-template-editor button,
+.examlist-template-editor input,
+.examlist-template-editor select,
+.examlist-template-editor textarea {
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+  margin: 0;
+  min-width: 0;
+  text-transform: none;
+}
+
+.examlist-template-editor button {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  height: auto;
+  line-height: normal;
+  padding: 0;
+  width: auto;
+}
+
+.examlist-template-editor button:disabled {
+  cursor: not-allowed;
+}
+
 /* Runtime layout */
 .examlist-template-editor .template-editor-runtime {
   display: grid;
@@ -5825,3 +5853,73 @@
 }
 
 
+
+/* Package runtime layout compatibility */
+.examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body {
+  --editor-toolbar-column-width: 330px;
+  --editor-tag-column-width: 210px;
+  --editor-page-properties-column-width: 230px;
+  grid-template-columns:
+    var(--editor-toolbar-column-width)
+    var(--editor-tag-column-width)
+    var(--template-editor-canvas-panel-width, 818px)
+    var(--editor-page-properties-column-width);
+  grid-template-rows: minmax(0, 1fr);
+  min-width: max-content;
+  width: max-content;
+}
+
+.examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body > .editor-toolbar-column {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body > .template-tag-panel {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body > .template-editor-page {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body > .template-page-properties-panel {
+  grid-column: 4;
+  grid-row: 1;
+}
+
+@media (max-width: 1120px) {
+  .examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body > .editor-toolbar-column,
+  .examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body > .template-tag-panel,
+  .examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body > .template-editor-page,
+  .examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body > .template-page-properties-panel {
+    grid-column: 1;
+    max-height: none;
+  }
+
+  .examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body > .editor-toolbar-column {
+    grid-row: 1;
+  }
+
+  .examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body > .template-tag-panel {
+    grid-row: 2;
+  }
+
+  .examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body > .template-editor-page {
+    grid-row: 3;
+    min-width: 0;
+  }
+
+  .examlist-template-editor .template-editor-runtime-shell.examlist-template-editor-body > .template-page-properties-panel {
+    grid-row: 4;
+    height: auto;
+  }
+}
