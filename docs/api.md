@@ -99,3 +99,51 @@ Custom format strings must contain at least one supported token and may not cont
 - `areDataTagEmptyValueDataEqual(tagDefinitions, leftValues, rightValues)`
 
 The save/load helpers use `window.localStorage` only when a browser `window` is available. Importing the package in Node.js does not require DOM globals.
+
+## Runtime
+
+- `mountTemplateEditor(options)`
+- `getTemplateEditorRuntime()`
+- `createTemplateEditorState(overrides)`
+- `createTemplatePreviewState(overrides)`
+- `normalizeTemplateTagDefinition(definition)`
+- `normalizeTemplateTagDefinitions(definitions)`
+
+`mountTemplateEditor()` creates the editor UI inside `options.root` or `options.container`.
+
+```js
+const editor = mountTemplateEditor({
+  root: document.getElementById("editor"),
+  template,
+  dataTags,
+  adapters: {
+    saveTemplate: async ({ template }) => template,
+    previewPdf: async ({ template, html, sampleData }) => ({ html, pageCount: 1 }),
+    buildApiUrl: (path) => path,
+  },
+});
+```
+
+Minimum returned API:
+
+- `getValue()`
+- `setValue(nextValue, options)`
+- `getHtml()`
+- `setHtml(html, options)`
+- `sync()`
+- `preview(context)`
+- `save(context)`
+- `focus()`
+- `destroy()`
+
+The returned object also exposes runtime editing helpers such as `insertHtml()`, `insertTag()`, `insertImageSource()`, `undo()`, and `redo()`.
+
+## CSS
+
+Import the editor styles once in the browser bundle:
+
+```js
+import "examlist-template-editor/styles.css";
+```
+
+The generated CSS is scoped under `.examlist-template-editor`.

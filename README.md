@@ -1,26 +1,22 @@
 # examlist-template-editor
 
-Portable template editor utilities extracted from ExamList.
+Portable ExamList template editor package.
 
-This first package version exposes the data tag core used by the ExamList template editor. It is intentionally small: it does not include the DOM editor, toolbar, PDF preview API client, or app state integration yet.
+This package exposes:
+
+- data tag core utilities that work in Node.js and browsers
+- a browser `mountTemplateEditor()` runtime that renders the editor UI into a container
+- scoped CSS at `examlist-template-editor/styles.css`
 
 ## Install From GitHub
 
-Public repository:
-
 ```bash
-npm install github:<user>/examlist-template-editor#v0.1.0
-```
-
-Private repository over SSH:
-
-```bash
-npm install git+ssh://git@github.com/<user>/examlist-template-editor.git#v0.1.0
+npm install github:ahe45/template-editor#v0.7.0
 ```
 
 Use immutable tags for application projects. Do not depend on a moving branch for production.
 
-## Usage
+## Core Usage
 
 ```js
 import {
@@ -42,29 +38,69 @@ const errorMessage = getDataTagSampleValueError(
 
 `text` is `2026.11.28 (토)`. `errorMessage` is `hh:mm 형식으로 입력하세요.`.
 
+## Browser Editor Usage
+
+```js
+import { mountTemplateEditor } from "examlist-template-editor";
+import "examlist-template-editor/styles.css";
+
+const editor = mountTemplateEditor({
+  root: document.getElementById("editor"),
+  template,
+  dataTags,
+  adapters: {
+    saveTemplate: async ({ template }) => template,
+    previewPdf: async ({ template, sampleData }) => ({
+      html: "",
+      pageCount: 1,
+      warnings: [],
+    }),
+    buildApiUrl: (path) => path,
+  },
+  onChange: (nextTemplate) => {
+    console.log(nextTemplate);
+  },
+});
+
+await editor.save();
+editor.destroy();
+```
+
+`mountTemplateEditor()` requires a browser DOM. The package root can still be imported in Node.js, but the runtime can only be mounted in a browser.
+
+## Adapter Boundary
+
+The package does not call ExamList application APIs directly. Consumer projects provide app-specific behavior through adapters.
+
+Supported adapters in `v0.7.0`:
+
+- `saveTemplate({ template, html, editor })`
+- `previewPdf({ template, html, sampleData, editor })`
+- `buildApiUrl(path)`
+- `resolveAssetUrl(path)`
+
+If `previewPdf` is not provided, `editor.preview()` returns local rendered HTML.
+
 ## Current Scope
 
-Included in `v0.1.0`:
+Included in `v0.7.0`:
 
-- date/time data tag type detection
-- data tag sample value validation
-- date/time token formatting
-- data tag format presets and validation
-- data tag sample/empty value payload helpers
-- lightweight data tag definition flattening
-- type declarations
-- independent unit tests
-- local consumer install verification
+- all `v0.1.0` data tag core utilities
+- bundled browser runtime from `client/template-editor-runtime`
+- toolbar, tag panel, document surface, page properties panel
+- table/image/barcode/QR insertion runtime exposed through the editor API
+- template object `documentHtml` get/set helpers
+- scoped CSS export
+- TypeScript declarations
+- Node unit tests, browser scenario test, pack check, consumer install verification
 
-Not included yet:
+Still app-specific and intentionally not included:
 
-- contenteditable document editor
-- toolbar UI
-- image/table/barcode/QR editing UI
-- candidate block UI
-- CSS entry
-- PDF preview renderer
-- ExamList API client
+- ExamList route/navigation integration
+- ExamList API clients
+- PDF generation worker/server renderer
+- account, school, permission management screens
+- XLSX import and operational data management screens
 
 ## Validation
 
@@ -76,10 +112,12 @@ npm run verify
 
 This runs:
 
+- runtime/CSS build
 - `node --test`
+- Playwright Chromium browser scenario
 - `npm pack --dry-run`
 - local consumer install and import verification
 
 ## Source Tracking
 
-See [docs/migration.md](docs/migration.md) for the ExamList source files used for this package version and any intentional local changes.
+See [docs/migration.md](docs/migration.md) for the ExamList source files used for this package version and intentional local changes.

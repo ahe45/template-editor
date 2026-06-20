@@ -23,6 +23,136 @@ export interface DataTagCatalog {
   [key: string]: unknown;
 }
 
+export interface TemplateEditorPageSettings {
+  documentHtml?: string;
+  [key: string]: unknown;
+}
+
+export interface TemplateEditorPage {
+  id?: string;
+  settings?: TemplateEditorPageSettings;
+  [key: string]: unknown;
+}
+
+export interface TemplateEditorLayoutPayload {
+  pages?: TemplateEditorPage[];
+  [key: string]: unknown;
+}
+
+export interface TemplateLayoutPayload {
+  layout?: TemplateEditorLayoutPayload;
+  documentHtml?: string;
+  html?: string;
+  settings?: TemplateEditorPageSettings;
+  [key: string]: unknown;
+}
+
+export type TemplateEditorValue = TemplateLayoutPayload | string;
+
+export interface PreviewPdfRequest {
+  editor: MountedTemplateEditor | null;
+  html: string;
+  sampleData: Record<string, unknown>;
+  template: TemplateEditorValue;
+}
+
+export interface PreviewPdfResult {
+  html?: string;
+  pdfUrl?: string;
+  pageCount?: number;
+  candidateCount?: number;
+  warnings?: string[];
+  [key: string]: unknown;
+}
+
+export interface SaveTemplateRequest {
+  editor: MountedTemplateEditor | null;
+  html: string;
+  template: TemplateEditorValue;
+  [key: string]: unknown;
+}
+
+export interface TemplateEditorAdapterMap {
+  buildApiUrl?: (path: string) => string;
+  resolveAssetUrl?: (path: string) => string;
+  saveTemplate?: (context: SaveTemplateRequest) => Promise<TemplateEditorValue | void> | TemplateEditorValue | void;
+  previewPdf?: (context: PreviewPdfRequest) => Promise<PreviewPdfResult> | PreviewPdfResult;
+}
+
+export interface TemplateEditorPermissions {
+  canManageTemplates?: boolean;
+  [key: string]: unknown;
+}
+
+export interface MountTemplateEditorOptions {
+  root?: Element | string | null;
+  container?: Element | string | null;
+  document?: Document;
+  html?: string;
+  initialHtml?: string;
+  template?: TemplateEditorValue;
+  selectedPageId?: string;
+  dataTags?: DataTagDefinition[] | DataTagCatalog;
+  tags?: DataTagDefinition[];
+  adapters?: TemplateEditorAdapterMap;
+  permissions?: TemplateEditorPermissions;
+  readOnly?: boolean;
+  idPrefix?: string;
+  clearRootOnDestroy?: boolean;
+  buildApiUrl?: (path: string) => string;
+  resolveAssetUrl?: (path: string) => string;
+  previewData?: Record<string, unknown>;
+  previewPhotoPath?: string;
+  getPreviewData?: () => Record<string, unknown>;
+  getPreviewDate?: () => string;
+  getGeneratedObjectValue?: (record: Record<string, unknown>) => string;
+  generatedObjectSourceKey?: string;
+  onChange?: (
+    nextTemplate: TemplateEditorValue,
+    context: {
+      editor: MountedTemplateEditor | null;
+      html: string;
+      runtime: unknown;
+    },
+  ) => void;
+  onDirtyChange?: (isDirty: boolean) => void;
+  onSetHtml?: (html: string, runtime: unknown, context: { notify: boolean; resetHistory: boolean }) => void;
+  [key: string]: unknown;
+}
+
+export interface MountedTemplateEditor {
+  applyCommand: (...args: unknown[]) => unknown;
+  destroy: () => void;
+  focus: () => void;
+  getHtml: () => string;
+  getRuntime: () => unknown;
+  getValue: () => TemplateEditorValue;
+  insertHtml: (html: string) => unknown;
+  insertImage: (...args: unknown[]) => unknown;
+  insertImageSource: (...args: unknown[]) => unknown;
+  insertTag: (tag: string) => unknown;
+  isDirty: () => boolean;
+  preview: (context?: Record<string, unknown>) => Promise<PreviewPdfResult>;
+  redo: () => unknown;
+  render: (data?: Record<string, unknown>, html?: string) => string;
+  renderInto: (target: Element | string, data?: Record<string, unknown>, html?: string) => string;
+  save: (context?: Record<string, unknown>) => Promise<TemplateEditorValue | void>;
+  setHtml: (html: string, options?: { notify?: boolean; resetHistory?: boolean }) => unknown;
+  setReadOnly: (isReadOnly: boolean) => void;
+  setValue: (
+    nextValue: TemplateEditorValue,
+    options?: {
+      html?: string;
+      markClean?: boolean;
+      notify?: boolean;
+      resetHistory?: boolean;
+      selectedPageId?: string;
+    },
+  ) => void;
+  sync: () => TemplateEditorValue;
+  undo: () => unknown;
+}
+
 export interface DataTagSampleValueConstraint {
   errorMessage: string;
   formatLabel: string;
@@ -48,6 +178,13 @@ export const dateFormatType: "date";
 export const timeFormatType: "time";
 export const dataTagSampleValuesEventName: "examlist:data-tag-sample-values-change";
 export const dataTagSettingsEventName: "examlist:data-tag-settings-change";
+
+export function getTemplateEditorRuntime(): unknown;
+export function createTemplateEditorState(overrides?: Record<string, unknown>): Record<string, unknown>;
+export function createTemplatePreviewState(overrides?: Record<string, unknown>): Record<string, unknown>;
+export function normalizeTemplateTagDefinition(definition?: DataTagDefinition): Readonly<DataTagDefinition> | null;
+export function normalizeTemplateTagDefinitions(definitions?: DataTagDefinition[]): readonly Readonly<DataTagDefinition>[];
+export function mountTemplateEditor(options?: MountTemplateEditorOptions): MountedTemplateEditor;
 
 export function getDataTagDefinitionKey(definitionOrKey?: DataTagDefinition | string): string;
 export function getDataTagFormatType(definitionOrKey?: DataTagDefinition | string): DataTagFormatType | "";

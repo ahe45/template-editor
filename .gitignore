@@ -3,5 +3,7 @@ npm-debug.log*
 *.tgz
 dist/
 coverage/
+playwright-report/
+test-results/
 .DS_Store
 Thumbs.db

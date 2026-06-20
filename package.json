@@ -1,7 +1,7 @@
 {
   "name": "examlist-template-editor",
-  "version": "0.1.0",
-  "description": "Portable core utilities for the ExamList template editor.",
+  "version": "0.7.0",
+  "description": "Portable core utilities and browser runtime for the ExamList template editor.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ahe45/template-editor.git"
@@ -17,27 +17,49 @@
     "./core": {
       "types": "./types/index.d.ts",
       "import": "./src/core/index.js"
+    },
+    "./runtime": {
+      "types": "./types/index.d.ts",
+      "import": "./src/runtime/index.js"
+    },
+    "./styles.css": {
+      "default": "./src/styles/template-editor.css"
     }
   },
   "files": [
     "src",
     "types",
     "fixtures",
+    "examples",
     "docs",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --test",
+    "build": "npm run build:runtime && npm run build:styles",
+    "build:runtime": "node scripts/build-runtime-bundle.js",
+    "build:styles": "node scripts/build-styles.js",
+    "prepack": "npm run build",
+    "test": "node --test test/*.test.js",
+    "test:browser": "playwright test",
+    "test:types": "tsc -p tsconfig.types.json --noEmit",
     "test:consumer": "node scripts/verify-consumer-install.js",
     "pack:check": "npm pack --dry-run",
-    "verify": "npm test && npm run pack:check && npm run test:consumer"
+    "verify": "npm run build && npm test && npm run test:types && npm run test:browser && npm run pack:check && npm run test:consumer"
   },
   "keywords": [
     "examlist",
     "template-editor",
-    "data-tags"
+    "data-tags",
+    "contenteditable",
+    "runtime"
   ],
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@playwright/test": "^1.61.0",
+    "postcss": "^8.5.15",
+    "postcss-prefix-selector": "^2.1.1",
+    "typescript": "^6.0.3"
+  }
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0
+
+- Added browser `mountTemplateEditor()` API.
+- Added bundled runtime generated from `client/template-editor-runtime`.
+- Added scoped CSS export at `examlist-template-editor/styles.css`.
+- Added runtime adapter boundary for save, preview, and asset URL behavior.
+- Added Playwright browser scenario covering multiple instances, value sync, preview, save, read-only mode, CSS scoping, and destroy cleanup.
+- Added TypeScript declarations for runtime options and mounted editor API.
+
 ## 0.1.0
 
 - Added portable data tag core modules.

@@ -51,8 +51,10 @@ try {
       import {
         formatDataTagSampleValue,
         getDataTagSampleValueError,
+        mountTemplateEditor,
       } from "examlist-template-editor";
       import { renderDataTagFormatPreview } from "examlist-template-editor/core";
+      import { getTemplateEditorRuntime } from "examlist-template-editor/runtime";
 
       const formatted = formatDataTagSampleValue("candidate.examDate", "2026-11-28", "YYYY.MM.DD (ddd)");
       const error = getDataTagSampleValueError("candidate.examStartTime", "9:00");
@@ -68,6 +70,23 @@ try {
 
       if (preview !== "오전 8:40") {
         throw new Error("Unexpected preview value: " + preview);
+      }
+
+      if (typeof mountTemplateEditor !== "function") {
+        throw new Error("mountTemplateEditor was not exported from the package root.");
+      }
+
+      if (typeof getTemplateEditorRuntime()?.createTemplateEditor !== "function") {
+        throw new Error("Runtime subpath did not expose the bundled runtime.");
+      }
+
+      try {
+        mountTemplateEditor({ root: null });
+        throw new Error("mountTemplateEditor should fail without a browser root.");
+      } catch (error) {
+        if (!/browser Document|valid root/.test(error.message)) {
+          throw error;
+        }
       }
     `,
     "utf8",

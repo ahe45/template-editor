@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Template Editor Browser Test</title>
+    <link rel="stylesheet" href="/src/styles/template-editor.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #f4f6fa;
+        font-family: system-ui, sans-serif;
+      }
+
+      #outsideButton.template-tool-button {
+        width: 80px;
+        height: 32px;
+        border: 0;
+        border-radius: 0;
+        background: rgb(1, 2, 3);
+        color: white;
+      }
+
+      .test-grid {
+        display: grid;
+        gap: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="template-tool-button" id="outsideButton" type="button">Outside</button>
+    <div class="test-grid">
+      <div id="editorA"></div>
+      <div id="editorB"></div>
+      <div id="editorReadOnly"></div>
+    </div>
+    <script type="module">
+      import { mountTemplateEditor } from "/src/index.js";
+
+      const dataTags = [
+        { dataKey: "candidate.name", label: "이름", token: "@{이름}" },
+        { dataKey: "candidate.examDate", label: "시험일", token: "@{시험일}", type: "date" },
+      ];
+
+      const firstTemplate = {
+        layout: {
+          pages: [
+            {
+              id: "page-1",
+              settings: {
+                documentHtml: "<p>첫 번째 본문</p>",
+              },
+            },
+          ],
+        },
+      };
+      const secondTemplate = {
+        layout: {
+          pages: [
+            {
+              id: "page-2",
+              settings: {
+                documentHtml: "<p>두 번째 본문</p>",
+              },
+            },
+          ],
+        },
+      };
+
+      window.changeEvents = [];
+      window.editorA = mountTemplateEditor({
+        root: document.getElementById("editorA"),
+        template: firstTemplate,
+        dataTags,
+        adapters: {
+          buildApiUrl: () => "",
+          saveTemplate: async ({ template }) => template,
+        },
+        onChange: (template, context) => {
+          window.changeEvents.push({
+            html: context.html,
+            template,
+          });
+        },
+      });
+      window.editorB = mountTemplateEditor({
+        root: document.getElementById("editorB"),
+        template: secondTemplate,
+        dataTags,
+        adapters: {
+          buildApiUrl: () => "",
+        },
+      });
+      window.editorReadOnly = mountTemplateEditor({
+        root: document.getElementById("editorReadOnly"),
+        html: "<p>읽기 전용 본문</p>",
+        dataTags,
+        permissions: {
+          canManageTemplates: false,
+        },
+      });
+      window.__templateEditorReady = true;
+    </script>
+  </body>
+</html>

@@ -3,13 +3,13 @@
 ## Install
 
 ```bash
-npm install github:<user>/examlist-template-editor#v0.1.0
+npm install github:ahe45/template-editor#v0.7.0
 ```
 
 For a private repository, prefer SSH in local development:
 
 ```bash
-npm install git+ssh://git@github.com/<user>/examlist-template-editor.git#v0.1.0
+npm install git+ssh://git@github.com/ahe45/template-editor.git#v0.7.0
 ```
 
 CI servers need a GitHub token or SSH deploy key that can read the repository.
@@ -44,8 +44,79 @@ const payload = createDataTagSettingsPayload(definitions, {
 });
 ```
 
-## Full Editor Integration
+## Browser Editor Integration
 
-The full DOM editor is intentionally not included in `v0.1.0`. It will be added in later versions after root-scoped DOM queries, CSS scoping, adapter boundaries, and browser scenario tests are in place.
+```js
+import { mountTemplateEditor } from "examlist-template-editor";
+import "examlist-template-editor/styles.css";
 
-Consumers should start with the core package and keep their own editor UI until the `mountTemplateEditor()` API is released.
+const editor = mountTemplateEditor({
+  root: document.getElementById("editor"),
+  template,
+  dataTags,
+  adapters: {
+    saveTemplate: async ({ template }) => {
+      await saveTemplateToYourApi(template);
+      return template;
+    },
+    previewPdf: async ({ template, sampleData }) => {
+      return previewTemplateWithYourApi(template, sampleData);
+    },
+    buildApiUrl: (path) => new URL(path, location.origin).href,
+  },
+  onChange: (nextTemplate) => {
+    updateLocalState(nextTemplate);
+  },
+  onDirtyChange: (isDirty) => {
+    setUnsavedIndicator(isDirty);
+  },
+});
+```
+
+Call `editor.destroy()` before removing the container from the page.
+
+## Template Shape
+
+The runtime reads and writes document HTML at the first matching location:
+
+- `template.layout.pages[].settings.documentHtml`
+- `template.documentHtml`
+- `template.html`
+- `template.settings.documentHtml`
+
+If `selectedPageId` is supplied, that page is updated. Otherwise the first page is updated.
+
+## Adapter Rules
+
+- The package does not call `fetch("/api/...")`.
+- Consumer projects own save, preview, auth, routing, and upload behavior.
+- Generated barcode/QR preview URLs should be supplied with `buildApiUrl()` or a preview adapter.
+- `previewPdf` is optional. Without it, `editor.preview()` returns local rendered HTML.
+
+## Read-Only Mode
+
+```js
+const editor = mountTemplateEditor({
+  root,
+  html: "<p>읽기 전용</p>",
+  permissions: {
+    canManageTemplates: false,
+  },
+});
+```
+
+You can later toggle:
+
+```js
+editor.setReadOnly(false);
+```
+
+## Browser and Bundler
+
+Supported target:
+
+- browser runtime with DOM APIs
+- Vite/Webpack-style CSS import
+- Node.js import for core APIs and type checking
+
+`mountTemplateEditor()` must not be called in Node.js or server rendering code.

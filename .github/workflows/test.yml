@@ -14,6 +14,10 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - run: npm run build
       - run: npm test
+      - run: npm run test:types
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
       - run: npm run pack:check
       - run: npm run test:consumer
