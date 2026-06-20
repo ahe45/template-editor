@@ -1,62 +1,21 @@
 # examlist-template-editor
 
-Portable ExamList template editor package.
+ExamList 양식 편집기를 다른 Node.js/브라우저 프로젝트에서도 사용할 수 있도록 분리한 패키지입니다.
 
-This package exposes:
+이 패키지는 다음 기능을 제공합니다.
 
-- data-tag core utilities that work in Node.js and browsers
-- a browser `mountTemplateEditor()` runtime that renders the editor UI into a container
-- scoped CSS at `examlist-template-editor/styles.css`
-- adapter hooks for save, PDF preview, asset URL resolution, and image upload
+- Node.js와 브라우저에서 모두 사용할 수 있는 데이터 태그 core 유틸리티
+- 브라우저 DOM 컨테이너에 양식 편집기 UI를 생성하는 `mountTemplateEditor()` 런타임
+- `examlist-template-editor/styles.css` 경로로 제공되는 scoped CSS
+- 저장, PDF 미리보기, asset URL 처리, 이미지 업로드를 외부 프로젝트 API에 연결하기 위한 adapter hook
 
-## Install From GitHub
+## GitHub에서 설치
 
 ```bash
 npm install github:ahe45/template-editor#v1.0.0
 ```
 
-Use immutable tags for application projects. Do not depend on a moving branch for production.
-
-## Handoff Text For Another Project
-
-Copy this text when asking another project to apply the editor package:
-
-```text
-Install and apply the template editor package below.
-
-npm install github:ahe45/template-editor#v1.0.0
-
-Use it like this:
-
-import { mountTemplateEditor } from "examlist-template-editor";
-import "examlist-template-editor/styles.css";
-
-Connect save, PDF preview, image upload, and data-tag loading to this project's own APIs through adapters.
-```
-
-Minimum integration shape:
-
-```js
-const editor = mountTemplateEditor({
-  root: document.getElementById("editor"),
-  template,
-  dataTags,
-  adapters: {
-    saveTemplate: async ({ template }) => {
-      // Connect this project's save API.
-      return template;
-    },
-    previewPdf: async ({ template, sampleData }) => {
-      // Connect this project's PDF preview API.
-      return { html: "", pageCount: 1, warnings: [] };
-    },
-    uploadImage: async ({ file }) => {
-      // Connect this project's image upload API.
-      return { url: "", alt: file.name };
-    },
-  },
-});
-```
+운영 프로젝트에서는 움직이는 branch가 아니라 고정 tag를 사용하는 것을 권장합니다.
 
 ## 다른 프로젝트 전달용 문구
 
@@ -99,7 +58,9 @@ const editor = mountTemplateEditor({
 });
 ```
 
-## Core Usage
+## Core 기능 사용
+
+데이터 태그 값 포맷팅이나 샘플 값 검증처럼 DOM이 필요 없는 기능은 Node.js와 브라우저 양쪽에서 사용할 수 있습니다.
 
 ```js
 import {
@@ -119,7 +80,9 @@ const errorMessage = getDataTagSampleValueError(
 );
 ```
 
-## Browser Editor Usage
+## 브라우저 편집기 사용
+
+브라우저에서 전체 편집기 UI를 사용하려면 CSS를 import하고 `mountTemplateEditor()`를 호출합니다.
 
 ```js
 import { mountTemplateEditor } from "examlist-template-editor";
@@ -151,13 +114,13 @@ await editor.save();
 editor.destroy();
 ```
 
-`mountTemplateEditor()` requires a browser DOM. The package root can still be imported in Node.js, but the runtime can only be mounted in a browser.
+`mountTemplateEditor()`는 브라우저 DOM이 필요합니다. 패키지 root와 core API는 Node.js에서도 import할 수 있지만, 편집기 UI mount는 브라우저에서만 호출해야 합니다.
 
-## Adapter Boundary
+## Adapter 경계
 
-The package does not call ExamList application APIs directly. Consumer projects provide app-specific behavior through adapters.
+이 패키지는 ExamList 애플리케이션 API를 직접 호출하지 않습니다. 저장, 미리보기, 업로드 같은 프로젝트별 동작은 사용하는 프로젝트에서 adapter로 주입해야 합니다.
 
-Supported adapters in `v1.0.0`:
+`v1.0.0`에서 지원하는 adapter는 다음과 같습니다.
 
 - `saveTemplate({ template, html, editor })`
 - `previewPdf({ template, html, sampleData, editor })`
@@ -165,48 +128,51 @@ Supported adapters in `v1.0.0`:
 - `buildApiUrl(path)`
 - `resolveAssetUrl(path)`
 
-If `previewPdf` is not provided, `editor.preview()` returns local rendered HTML.
-If `uploadImage` is not provided, image file insertion falls back to the bundled runtime's local data URL behavior.
+`previewPdf`를 제공하지 않으면 `editor.preview()`는 로컬에서 렌더링한 HTML을 반환합니다.
 
-## Current Scope
+`uploadImage`를 제공하지 않으면 이미지 파일 삽입은 bundled runtime의 로컬 data URL 방식으로 동작합니다.
 
-Included in `v1.0.0`:
+## 현재 포함 범위
 
-- data-tag core utilities
-- bundled browser runtime from `client/template-editor-runtime`
+`v1.0.0`에 포함된 기능은 다음과 같습니다.
+
+- 데이터 태그 core 유틸리티
+- `client/template-editor-runtime`에서 생성한 브라우저 runtime bundle
 - toolbar, tag panel, document surface, page properties panel
-- table/image/barcode/QR insertion runtime exposed through the editor API
-- template object `documentHtml` get/set helpers
-- image upload adapter support for `editor.insertImage(file)` and toolbar file input
+- 표, 이미지, barcode, QR 삽입 runtime API
+- template 객체의 `documentHtml` 읽기/쓰기 helper
+- `editor.insertImage(file)`과 toolbar file input을 위한 이미지 업로드 adapter 지원
 - scoped CSS export
-- TypeScript declarations
-- Node unit tests, TypeScript API tests, browser scenario test, pack check, and consumer install verification
+- TypeScript 선언 파일
+- Node unit test, TypeScript API test, browser scenario test, pack check, consumer install verification
 
-Still app-specific and intentionally not included:
+의도적으로 포함하지 않은 애플리케이션 전용 기능은 다음과 같습니다.
 
-- ExamList route/navigation integration
-- ExamList API clients
-- PDF generation worker/server renderer
-- account, school, and permission management screens
-- XLSX import and operational data management screens
+- ExamList route/navigation 연동
+- ExamList API client
+- PDF 생성 worker/server renderer
+- 계정, 학교, 권한 관리 화면
+- XLSX import와 운영 데이터 관리 화면
 
-## Validation
+위 기능은 각 프로젝트에서 직접 구현하거나 adapter로 연결해야 합니다.
 
-Run all checks from this package folder:
+## 검증
+
+패키지 폴더에서 전체 검증을 실행할 수 있습니다.
 
 ```bash
 npm run verify
 ```
 
-This runs:
+이 명령은 다음 검증을 실행합니다.
 
 - runtime/CSS build
 - `node --test`
-- TypeScript public API checks
+- TypeScript public API check
 - Playwright Chromium browser scenario
 - `npm pack --dry-run`
 - local consumer install and import verification
 
-## Source Tracking
+## 원본 소스 추적
 
-See [docs/migration.md](docs/migration.md) for the ExamList source files used for this package version and intentional local changes.
+이 패키지를 만들 때 사용한 ExamList 원본 소스 파일과 의도적으로 변경한 내용은 [docs/migration.md](docs/migration.md)에 정리되어 있습니다.
