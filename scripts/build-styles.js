@@ -23,6 +23,15 @@ function readUtf8(path) {
   return readFileSync(path, "utf8").replace(/^\uFEFF/, "");
 }
 
+if (!existsSync(runtimeCssPath) || !existsSync(templateEditorCssPath)) {
+  if (existsSync(outputPath)) {
+    console.log("Skipped CSS rebuild because the ExamList source tree is not available.");
+    process.exit(0);
+  }
+
+  throw new Error("Could not find ExamList template editor CSS sources.");
+}
+
 function resolveCssImports(path, seen = new Set()) {
   const absolutePath = resolve(path);
 

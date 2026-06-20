@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.1
+
+- Fixed standalone GitHub Actions builds by reusing committed runtime/CSS artifacts when the ExamList source tree is not available.
+
 ## 0.7.0
 
 - Added browser `mountTemplateEditor()` API.

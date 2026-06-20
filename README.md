@@ -11,7 +11,7 @@ This package exposes:
 ## Install From GitHub
 
 ```bash
-npm install github:ahe45/template-editor#v0.7.0
+npm install github:ahe45/template-editor#v0.7.1
 ```
 
 Use immutable tags for application projects. Do not depend on a moving branch for production.
@@ -83,7 +83,7 @@ If `previewPdf` is not provided, `editor.preview()` returns local rendered HTML.
 
 ## Current Scope
 
-Included in `v0.7.0`:
+Included in `v0.7.1`:
 
 - all `v0.1.0` data tag core utilities
 - bundled browser runtime from `client/template-editor-runtime`

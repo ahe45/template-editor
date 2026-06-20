@@ -3,13 +3,13 @@
 ## Install
 
 ```bash
-npm install github:ahe45/template-editor#v0.7.0
+npm install github:ahe45/template-editor#v0.7.1
 ```
 
 For a private repository, prefer SSH in local development:
 
 ```bash
-npm install git+ssh://git@github.com/ahe45/template-editor.git#v0.7.0
+npm install git+ssh://git@github.com/ahe45/template-editor.git#v0.7.1
 ```
 
 CI servers need a GitHub token or SSH deploy key that can read the repository.

@@ -1,6 +1,6 @@
 {
   "name": "examlist-template-editor",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Portable core utilities and browser runtime for the ExamList template editor.",
   "repository": {
     "type": "git",

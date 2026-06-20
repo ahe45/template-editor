@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,6 +16,15 @@ const outputPath = join(packageRoot, "src", "runtime", "template-editor-runtime.
 
 function readUtf8(path) {
   return readFileSync(path, "utf8").replace(/^\uFEFF/, "");
+}
+
+if (!existsSync(manifestPath)) {
+  if (existsSync(outputPath)) {
+    console.log("Skipped runtime bundle rebuild because the ExamList source tree is not available.");
+    process.exit(0);
+  }
+
+  throw new Error(`Could not find runtime manifest at ${manifestPath}`);
 }
 
 function getRequiredScripts(manifestSource) {
