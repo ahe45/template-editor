@@ -33,6 +33,7 @@ const editor: MountedTemplateEditor = mountTemplateEditor({
   root: document.createElement("div"),
   template,
   dataTags,
+  layoutMode: "desktop",
   adapters: {
     saveTemplate: async ({ template: nextTemplate }) => nextTemplate,
     previewPdf: async ({ html }) => ({ html, pageCount: 1, warnings: [] }),

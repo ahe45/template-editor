@@ -291,8 +291,18 @@ function removeTransientRuntimeNodes(rootElement) {
     });
 }
 
-function applyRuntimeLayoutClasses(rootElement) {
-  rootElement.querySelector(".template-editor-runtime-shell")?.classList.add("examlist-template-editor-body");
+function applyRuntimeLayoutClasses(rootElement, options = {}) {
+  const shellElement = rootElement.querySelector(".template-editor-runtime-shell");
+
+  if (!shellElement) {
+    return;
+  }
+
+  const isResponsiveLayout = options.layoutMode === "responsive" || options.responsiveLayout === true;
+
+  shellElement.classList.add("examlist-template-editor-body");
+  shellElement.classList.toggle("is-responsive-layout", isResponsiveLayout);
+  rootElement.dataset.examlistTemplateEditorLayout = isResponsiveLayout ? "responsive" : "desktop";
 }
 
 function normalizeRuntimeOptions(options, instanceId, onRuntimeChange) {
@@ -370,7 +380,7 @@ export function mountTemplateEditor(options = {}) {
   const rootElement = runtimeOptions.root;
   const runtimeApi = bundledTemplateEditorRuntime.createTemplateEditor(runtimeOptions);
 
-  applyRuntimeLayoutClasses(rootElement);
+  applyRuntimeLayoutClasses(rootElement, options);
   applyReadOnlyMode(rootElement, readOnlyState);
 
   function getHtml() {

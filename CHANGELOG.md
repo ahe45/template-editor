@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+
+- Kept the packaged editor in desktop four-column layout by default, even when the host app viewport is narrow.
+- Added `layoutMode: "responsive"` / `responsiveLayout: true` opt-in for projects that explicitly want the stacked responsive layout.
+- Added a browser regression test that mounts the editor in a narrow viewport and verifies the desktop layout remains intact.
+
 ## 1.0.1
 
 - Fixed the packaged runtime layout so the editor uses the same four-column toolbar, tag panel, canvas, and page-properties arrangement as the ExamList editor.

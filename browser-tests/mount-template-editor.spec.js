@@ -178,6 +178,7 @@ test.describe("mountTemplateEditor browser integration", () => {
       }
     });
 
+    await page.setViewportSize({ width: 900, height: 1100 });
     await page.goto(`${server.url}/browser-tests/pages/mount.html`);
     try {
       await page.waitForFunction(() => window.__templateEditorReady === true, null, { timeout: 10_000 });
@@ -216,12 +217,15 @@ test.describe("mountTemplateEditor browser integration", () => {
         page: rect(pagePanel),
         pageProperties: rect(pageProperties),
         shellClassName: shell.className,
+        rootLayout: document.getElementById("editorA").dataset.examlistTemplateEditorLayout,
         tagPanel: rect(tagPanel),
         toolbar: rect(toolbar),
         toolButton: rect(toolButton),
       };
     });
     expect(runtimeLayout.shellClassName).toContain("examlist-template-editor-body");
+    expect(runtimeLayout.shellClassName).not.toContain("is-responsive-layout");
+    expect(runtimeLayout.rootLayout).toBe("desktop");
     expect(runtimeLayout.tagPanel.left).toBeGreaterThan(runtimeLayout.toolbar.left);
     expect(runtimeLayout.page.left).toBeGreaterThan(runtimeLayout.tagPanel.left);
     expect(runtimeLayout.pageProperties.left).toBeGreaterThan(runtimeLayout.page.left);

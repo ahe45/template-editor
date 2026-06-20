@@ -123,6 +123,8 @@ export interface MountTemplateEditorOptions {
   adapters?: TemplateEditorAdapterMap;
   permissions?: TemplateEditorPermissions;
   readOnly?: boolean;
+  layoutMode?: "desktop" | "responsive";
+  responsiveLayout?: boolean;
   idPrefix?: string;
   clearRootOnDestroy?: boolean;
   buildApiUrl?: (path: string) => string;
